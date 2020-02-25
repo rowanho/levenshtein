@@ -53,9 +53,9 @@ func ComputeDistance(s1, s2 []rune) int {
 
 
 type EditStats = struct {
-	Subs map[string]int
-	Ins map[string]int
-	Dels map[string]int
+	Subs map[string]int `json:"subs"`
+	Ins map[string]int  `json:"ins"`
+	Dels map[string]int `json:"dels"`
 }
 
 func newEditStats() EditStats {
