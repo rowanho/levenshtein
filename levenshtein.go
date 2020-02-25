@@ -58,7 +58,7 @@ type EditStats = struct {
 	Dels map[string]int `json:"dels"`
 }
 
-func newEditStats() EditStats {
+func NewEditStats() EditStats {
 	var e EditStats
 	e.Subs = make(map[string]int)
 	e.Ins = make(map[string]int)
