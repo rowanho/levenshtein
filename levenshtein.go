@@ -69,7 +69,7 @@ func NewEditStats() EditStats {
 func ComputeDistanceWithConstruction(s1, s2 []rune) (int, EditStats) {
 	
 	if len(s1) == 0 {
-		e := newEditStats()
+		e := NewEditStats()
 		for _, c := range s2 {
 			e.Ins[string(c)] += 1
 		}
@@ -77,7 +77,7 @@ func ComputeDistanceWithConstruction(s1, s2 []rune) (int, EditStats) {
 	}
 
 	if len(s2) == 0 {
-		e := newEditStats()	
+		e := NewEditStats()	
 		for _, c := range s1 {
 			e.Dels[string(c)] += 1
 		}
@@ -110,7 +110,7 @@ func ComputeDistanceWithConstruction(s1, s2 []rune) (int, EditStats) {
 }
 
 func reconstruct(d [][]uint16, s1, s2 []rune) EditStats {
-	e := newEditStats()
+	e := NewEditStats()
 	i := len(s1)
 	j := len(s2)
 	var s uint16
