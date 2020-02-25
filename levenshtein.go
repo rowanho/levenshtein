@@ -4,38 +4,22 @@
 // https://gist.github.com/andrei-m/982927#gistcomment-1931258
 package levenshtein
 
-import "unicode/utf8"
-
 // ComputeDistance computes the levenshtein distance between the two
 // strings passed as an argument. The return value is the levenshtein distance
 //
 // Works on runes (Unicode code points) but does not normalize
 // the input strings. See https://blog.golang.org/normalization
 // and the golang.org/x/text/unicode/norm pacage.
-func ComputeDistance(a, b string) int {
-	if len(a) == 0 {
-		return utf8.RuneCountInString(b)
+func ComputeDistance(s1, s2 []rune) int {
+	if len(s1) == 0 {
+		return len(s2)
 	}
 
-	if len(b) == 0 {
-		return utf8.RuneCountInString(a)
+	if len(s2) == 0 {
+		return len(s1)
 	}
 
-	if a == b {
-		return 0
-	}
 
-	// We need to convert to []rune if the strings are non-ASCII.
-	// This could be avoided by using utf8.RuneCountInString
-	// and then doing some juggling with rune indices,
-	// but leads to far more bounds checks. It is a reasonable trade-off.
-	s1 := []rune(a)
-	s2 := []rune(b)
-
-	// swap to save some memory O(min(a,b)) instead of O(a)
-	if len(s1) > len(s2) {
-		s1, s2 = s2, s1
-	}
 	lenS1 := len(s1)
 	lenS2 := len(s2)
 
@@ -65,6 +49,94 @@ func ComputeDistance(a, b string) int {
 		x[lenS1] = prev
 	}
 	return int(x[lenS1])
+}
+
+
+type EditStats = struct {
+	Subs map[string]int
+	Ins map[string]int
+	Dels map[string]int
+}
+
+func newEditStats() EditStats {
+	var e EditStats
+	e.Subs = make(map[string]int)
+	e.Ins = make(map[string]int)
+	e.Dels = make(map[string]int)
+	return  e
+}
+
+func ComputeDistanceWithConstruction(s1, s2 []rune) (int, EditStats) {
+	
+	if len(s1) == 0 {
+		e := newEditStats()
+		for _, c := range s2 {
+			e.Ins[string(c)] += 1
+		}
+		return len(s2), e
+	}
+
+	if len(s2) == 0 {
+		e := newEditStats()	
+		for _, c := range s1 {
+			e.Dels[string(c)] += 1
+		}
+		return len(s1), e
+	}
+
+	lenS1 := len(s1)
+	lenS2 := len(s2)
+	
+	d := make([][]uint16, lenS1 + 1)
+	for i := 0 ; i < lenS1 + 1; i++ {
+		d[i] = make([]uint16, lenS2 +1)
+		d[i][0] = uint16(i)
+	}
+	
+	var s uint16
+	for j := 1; j < lenS2 + 1; j++ {
+		for i := 1; i < lenS1 + 1; i++ {
+			if s1[i-1] == s2[j-1] {
+				s = 0
+			} else {
+				s = 1
+			}
+			d[i][j] = min(min(d[i-1][j] + 1, d[i][j-1] + 1), d[i-1][j-1] + s)
+		}
+	}
+	
+	return int(d[lenS1][lenS2]), reconstruct(d, s1, s2)
+
+}
+
+func reconstruct(d [][]uint16, s1, s2 []rune) EditStats {
+	e := newEditStats()
+	i := len(s1)
+	j := len(s2)
+	var s uint16
+	
+	for i > 0 && j > 0 {
+		if s1[i-1] == s2[j-1] {
+			s = 0
+		} else {
+			s = 1
+		}
+		if d[i-1][j-1] + s <= d[i-1][j] + 1 {
+			if s == 1 {
+				// Mismatch substitution
+				e.Subs[string(s1[i-1]) + string(s2[i-1])] += 1
+			}
+			j -= 1
+			i -= 1
+		} else if d[i-1][j] + 1 <= d[i][j-1] + 1 {
+			e.Dels[string(s1[i-1])] += 1			
+			i -=  1
+		} else {
+			e.Ins[string(s2[i-1])] += 1			
+			j -= 1
+		}
+	}
+	return e
 }
 
 func min(a, b uint16) uint16 {
