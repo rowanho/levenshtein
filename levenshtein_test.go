@@ -51,6 +51,16 @@ func TestUnicode(t *testing.T) {
 	}
 }
 
+func eqStats(e1, e2 EditStats) bool {
+	if !reflect.DeepEqual(e1.Subs, e2.Subs)	{
+		return false
+	} else if !reflect.DeepEqual(e1.Ins, e2.Ins)	{
+		return false
+	} else if !reflect.DeepEqual(e1.Dels, e2.Dels)	{
+		return false
+	}
+	return true
+}
 
 func TestReconstruction(t *testing.T) {
 	tests := []struct {
@@ -85,13 +95,22 @@ func TestReconstruction(t *testing.T) {
 			 Subs : map[string]int {"lI":2, "oa":1},
 		 }, 
 	   },
+	   {"heasssllo",
+		"hello",
+		4,
+		EditStats{
+			Ins : map[string]int{},
+			Dels : map[string]int{"a":1, "s":3},			 
+			Subs : map[string]int {},
+		}, 
+	  },
 	}
 	for i, d := range tests {
 		n, e := ComputeDistanceWithConstruction([]rune(d.a), []rune(d.b))
 		if n != d.wantScore {
 			t.Errorf("Test[%d]: ComputeDistance(%q,%q) returned %v, want %v",
 				i, d.a, d.b, n, d.wantScore)
-		} else if !reflect.DeepEqual(d.wantStats.Subs, e.Subs) {
+		} else if !eqStats(d.wantStats, e) {
 			t.Errorf("Test[%d]: ComputeDistance(%q,%q)",i, d.a, d.b)
 			t.Log("Want: ", d.wantStats)
 			t.Log("Got: ", e)			

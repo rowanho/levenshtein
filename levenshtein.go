@@ -124,7 +124,7 @@ func reconstruct(d [][]uint16, s1, s2 []rune) EditStats {
 		if d[i-1][j-1] + s <= d[i-1][j] + 1 {
 			if s == 1 {
 				// Mismatch substitution
-				e.Subs[string(s1[i-1]) + string(s2[i-1])] += 1
+				e.Subs[string(s1[i-1]) + string(s2[j-1])] += 1
 			}
 			j -= 1
 			i -= 1
@@ -132,7 +132,7 @@ func reconstruct(d [][]uint16, s1, s2 []rune) EditStats {
 			e.Dels[string(s1[i-1])] += 1			
 			i -=  1
 		} else {
-			e.Ins[string(s2[i-1])] += 1			
+			e.Ins[string(s2[j-1])] += 1			
 			j -= 1
 		}
 	}
