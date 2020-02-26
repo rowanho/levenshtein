@@ -95,15 +95,24 @@ func TestReconstruction(t *testing.T) {
 			 Subs : map[string]int {"lI":2, "oa":1},
 		 }, 
 	   },
-	   {"heasssllo",
+	   {"heahhhllo",
 		"hello",
 		4,
 		EditStats{
 			Ins : map[string]int{},
-			Dels : map[string]int{"a":1, "s":3},			 
+			Dels : map[string]int{"a":1, "h":3},			 
 			Subs : map[string]int {},
 		}, 
-	  },
+	   },
+	   {"hello",
+		"nnnnnnnhello",
+		7,
+		EditStats{
+			Ins : map[string]int{"n":7},
+			Dels : map[string]int{},			 
+			Subs : map[string]int {},
+		}, 
+	   },
 	}
 	for i, d := range tests {
 		n, e := ComputeDistanceWithConstruction([]rune(d.a), []rune(d.b))

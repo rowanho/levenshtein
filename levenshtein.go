@@ -4,6 +4,7 @@
 // https://gist.github.com/andrei-m/982927#gistcomment-1931258
 package levenshtein
 
+
 // ComputeDistance computes the levenshtein distance between the two
 // strings passed as an argument. The return value is the levenshtein distance
 //
@@ -93,6 +94,10 @@ func ComputeDistanceWithConstruction(s1, s2 []rune) (int, EditStats) {
 		d[i][0] = uint16(i)
 	}
 	
+	for j := 0 ; j < lenS2 + 1; j++ {
+		d[0][j] = uint16(j)
+	}
+	
 	var s uint16
 	for j := 1; j < lenS2 + 1; j++ {
 		for i := 1; i < lenS1 + 1; i++ {
@@ -121,7 +126,7 @@ func reconstruct(d [][]uint16, s1, s2 []rune) EditStats {
 		} else {
 			s = 1
 		}
-		if d[i-1][j-1] + s <= d[i-1][j] + 1 {
+		if d[i-1][j-1] + s <= min(d[i-1][j] + 1, d[i][j-1] + 1){
 			if s == 1 {
 				// Mismatch substitution
 				e.Subs[string(s1[i-1]) + string(s2[j-1])] += 1
@@ -136,6 +141,19 @@ func reconstruct(d [][]uint16, s1, s2 []rune) EditStats {
 			j -= 1
 		}
 	}
+	
+	if i > 0 {
+		for k := i; k > 0; k-- {
+			e.Dels[string(s1[k-1])] += 1						
+		} 
+	}
+	
+	if j > 0 {
+		for k := j; j > 0; j-- {
+			e.Ins[string(s2[k-1])] += 1						
+		} 		
+	}
+	
 	return e
 }
 
