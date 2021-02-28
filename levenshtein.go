@@ -52,21 +52,26 @@ func ComputeDistance(s1, s2 []rune) int {
 	return int(x[lenS1])
 }
 
-
+// EditStats stores information about the number of substitutions, insertions and deletions 
+// used in the optimal path between the two string
 type EditStats = struct {
 	Subs map[string]int `json:"subs"`
 	Ins map[string]int  `json:"ins"`
 	Dels map[string]int `json:"dels"`
 }
 
+// NewEditStats returns a new EditStats object
 func NewEditStats() EditStats {
-	var e EditStats
-	e.Subs = make(map[string]int)
-	e.Ins = make(map[string]int)
-	e.Dels = make(map[string]int)
-	return  e
+	return EditStats{
+		Subs: map[string]int{},
+		Ins: map[string]int{},
+		Dels: map[string]int{},
+	}
 }
 
+// ComputeDistanceWithConstruction extends ComputeDistance to return 
+// information about the number of substitutions, insertions and deletions
+// alongside the distance score
 func ComputeDistanceWithConstruction(s1, s2 []rune) (int, EditStats) {
 	
 	if len(s1) == 0 {
